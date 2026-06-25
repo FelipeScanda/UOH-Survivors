@@ -1,0 +1,8 @@
+WIDTH = 1280
+HEIGHT = 720
+
+FPS = 60
+
+TITLE = "UOH Survivor"
+
+BACKGROUND_COLOR = (30, 30, 30)
