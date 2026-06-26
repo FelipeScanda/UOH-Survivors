@@ -6,6 +6,7 @@ from settings import *
 from entities.player import Player
 from entities.enemy import Enemy
 from entities.projectile import Projectile
+from entities.xp_gem import XPGem
 
 # Inicializa todos los módulos de pygame
 pygame.init()
@@ -27,6 +28,9 @@ enemies = []
 
 #Crear proyectiles
 projectiles = []
+
+#Crear gemas de experiencia
+xp_gems = []
 
 for i in range(5):
 
@@ -85,6 +89,39 @@ while running:
     for projectile in projectiles:
         projectile.update(dt)
 
+    for projectile in projectiles[:]:
+
+        projectile_rect = pygame.Rect(
+            projectile.position.x - projectile.radius,
+            projectile.position.y - projectile.radius,
+            projectile.radius * 2,
+            projectile.radius * 2
+        )
+
+        for enemy in enemies[:]:
+
+            if projectile_rect.colliderect(enemy.rect):
+
+                died = enemy.take_damage(1)
+
+                # Eliminar proyectil
+                if projectile in projectiles:
+                    projectiles.remove(projectile)
+
+                # Si enemigo murió
+                if died:
+
+                    xp_gem = XPGem(
+                        enemy.rect.centerx,
+                        enemy.rect.centery
+                    )
+
+                    xp_gems.append(xp_gem)
+
+                    enemies.remove(enemy)
+
+                break
+
     # DRAW
     screen.fill(BACKGROUND_COLOR)
 
@@ -98,6 +135,10 @@ while running:
     #Dibujar proyectiles
     for projectile in projectiles:
         projectile.draw(screen)
+
+    #Dibujar gemas de experiencia
+    for gem in xp_gems:
+        gem.draw(screen)
 
     # Actualizar pantalla
     pygame.display.flip()
