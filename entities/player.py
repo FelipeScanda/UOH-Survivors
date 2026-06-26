@@ -24,6 +24,10 @@ class Player:
         self.shoot_cooldown = 0.5
         self.shoot_timer = 0
 
+        #Experiencia y nivel
+        self.xp = 0
+        self.level = 1
+
     def handle_movement(self, dt):
 
         # Obtener teclas presionadas
