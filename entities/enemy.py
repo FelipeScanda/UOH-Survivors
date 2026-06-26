@@ -1,0 +1,47 @@
+import pygame
+import random
+
+from settings import *
+
+
+class Enemy:
+
+    def __init__(self, x, y):
+
+        self.width = 30
+        self.height = 30
+
+        self.rect = pygame.Rect(x, y, self.width, self.height)
+
+        self.speed = 150
+
+        self.color = (200, 50, 50)
+
+    def update(self, player, dt):
+
+        # Posición jugador
+        player_pos = pygame.Vector2(
+            player.rect.centerx,
+            player.rect.centery
+        )
+
+        # Posición enemigo
+        enemy_pos = pygame.Vector2(
+            self.rect.centerx,
+            self.rect.centery
+        )
+
+        # Dirección hacia jugador
+        direction = player_pos - enemy_pos
+
+        # Normalizar
+        if direction.length() > 0:
+            direction = direction.normalize()
+
+        # Mover enemigo
+        self.rect.x += direction.x * self.speed * dt
+        self.rect.y += direction.y * self.speed * dt
+
+    def draw(self, screen):
+
+        pygame.draw.rect(screen, self.color, self.rect)
