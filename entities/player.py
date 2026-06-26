@@ -99,3 +99,19 @@ class Player:
     def draw(self, screen):
 
         pygame.draw.rect(screen, self.color, self.rect)
+    
+    def gain_xp(self, amount):
+
+        #Añade xp
+        self.xp += amount
+
+        #Incrementala cantidad de xp requerida por nivel
+        xp_needed = self.level * 5
+
+        #Subir nivel
+        if self.xp >= xp_needed:
+
+            self.xp = 0
+            self.level += 1
+
+            print(f"Subiste a nivel {self.level}")
