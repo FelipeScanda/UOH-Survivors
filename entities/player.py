@@ -42,6 +42,13 @@ class Player:
         if keys[pygame.K_s]:
             dy = 1
 
+        # Crear vector de movimiento
+        movement = pygame.Vector2(dx, dy)
+
+        # Normalizar si hay movimiento
+        if movement.length() > 0:
+            movement = movement.normalize()
+
         # Aplicar movimiento usando delta time
         self.rect.x += dx * self.speed * dt
         self.rect.y += dy * self.speed * dt
