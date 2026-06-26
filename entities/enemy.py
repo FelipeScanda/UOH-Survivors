@@ -7,15 +7,22 @@ from settings import *
 class Enemy:
 
     def __init__(self, x, y):
-
+        
+        #Tamaño del enemigo
         self.width = 30
         self.height = 30
 
+        #Rectángulo del enemigo
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
+        #Velocidad
         self.speed = 150
 
+        #Color
         self.color = (200, 50, 50)
+
+        #Vida
+        self.health = 3
 
     def update(self, player, dt):
 
