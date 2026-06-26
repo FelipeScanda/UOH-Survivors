@@ -20,6 +20,10 @@ class Player:
         # Color
         self.color = (50, 200, 50)
 
+        #Propiedades de disparo
+        self.shoot_cooldown = 0.5
+        self.shoot_timer = 0
+
     def handle_movement(self, dt):
 
         # Obtener teclas presionadas
@@ -52,6 +56,41 @@ class Player:
         # Aplicar movimiento usando delta time
         self.rect.x += dx * self.speed * dt
         self.rect.y += dy * self.speed * dt
+
+    def shoot(self, enemies):
+
+        # No disparar si no hay enemigos
+        if not enemies:
+            return None
+
+        player_pos = pygame.Vector2(
+            self.rect.centerx,
+            self.rect.centery
+        )
+
+        # Buscar enemigo más cercano
+        closest_enemy = min(
+            enemies,
+            key=lambda enemy: player_pos.distance_to(
+                pygame.Vector2(
+                    enemy.rect.centerx,
+                    enemy.rect.centery
+                )
+            )
+        )
+
+        enemy_pos = pygame.Vector2(
+            closest_enemy.rect.centerx,
+            closest_enemy.rect.centery
+        )
+
+        # Dirección hacia enemigo
+        direction = enemy_pos - player_pos
+
+        if direction.length() > 0:
+            direction = direction.normalize()
+
+        return direction
 
     def draw(self, screen):
 

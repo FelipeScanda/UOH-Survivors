@@ -5,6 +5,7 @@ import random
 from settings import *
 from entities.player import Player
 from entities.enemy import Enemy
+from entities.projectile import Projectile
 
 # Inicializa todos los módulos de pygame
 pygame.init()
@@ -23,6 +24,9 @@ player = Player(WIDTH // 2, HEIGHT // 2)
 
 #Crear enemigos
 enemies = []
+
+#Crear proyectiles
+projectiles = []
 
 for i in range(5):
 
@@ -53,9 +57,33 @@ while running:
     #Actualiza jugador
     player.handle_movement(dt)
 
+    #Actualiza temporizador de disparo
+    player.shoot_timer -= dt
+
+    #Disparo automático
+    if player.shoot_timer <= 0:
+
+        direction = player.shoot(enemies)
+
+        if direction:
+
+            projectile = Projectile(
+                player.rect.centerx,
+                player.rect.centery,
+                direction
+            )
+
+            projectiles.append(projectile)
+
+            player.shoot_timer = player.shoot_cooldown
+
     #Actualiza enemigos
     for enemy in enemies:
         enemy.update(player, dt)
+
+    #Actualiza proyectiles
+    for projectile in projectiles:
+        projectile.update(dt)
 
     # DRAW
     screen.fill(BACKGROUND_COLOR)
@@ -66,6 +94,10 @@ while running:
     #Dibujar enemigos
     for enemy in enemies:
         enemy.draw(screen)
+
+    #Dibujar proyectiles
+    for projectile in projectiles:
+        projectile.draw(screen)
 
     # Actualizar pantalla
     pygame.display.flip()
