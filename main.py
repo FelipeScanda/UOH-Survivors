@@ -26,18 +26,48 @@ player = Player(WIDTH // 2, HEIGHT // 2)
 #Crear enemigos
 enemies = []
 
+#Porpiedades de spawneo de enemigos
+enemy_spawn_timer = 0
+enemy_spawn_cooldown = 2
+
 #Crear proyectiles
 projectiles = []
 
 #Crear gemas de experiencia
 xp_gems = []
 
+#Genera 5 enemigos
 for i in range(5):
 
     enemy = Enemy(
         random.randint(0, WIDTH),
         random.randint(0, HEIGHT)
     )
+
+    enemies.append(enemy)
+
+#Funcion para spawnear enemigos
+def spawn_enemy():
+
+    side = random.randint(0, 3)
+
+    if side == 0:  # arriba
+        x = random.randint(0, WIDTH)
+        y = -50
+
+    elif side == 1:  # abajo
+        x = random.randint(0, WIDTH)
+        y = HEIGHT + 50
+
+    elif side == 2:  # izquierda
+        x = -50
+        y = random.randint(0, HEIGHT)
+
+    else:  # derecha
+        x = WIDTH + 50
+        y = random.randint(0, HEIGHT)
+
+    enemy = Enemy(x, y)
 
     enemies.append(enemy)
 
@@ -63,6 +93,16 @@ while running:
 
     #Actualiza temporizador de disparo
     player.shoot_timer -= dt
+
+    #Actualiza tempórizador de spawn de enemigos
+    enemy_spawn_timer += dt
+
+    #Spawn automatico de enemigos
+    if enemy_spawn_timer >= enemy_spawn_cooldown:
+
+        spawn_enemy()
+
+        enemy_spawn_timer = 0
 
     #Disparo automático
     if player.shoot_timer <= 0:
