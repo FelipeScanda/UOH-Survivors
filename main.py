@@ -162,6 +162,21 @@ while running:
 
                 break
 
+    player_center = pygame.Vector2(
+        player.rect.centerx,
+        player.rect.centery
+    )
+
+    for gem in xp_gems[:]:
+
+        distance = player_center.distance_to(gem.position)
+
+        if distance < 30:
+
+            player.gain_xp(gem.value)
+
+            xp_gems.remove(gem)
+
     # DRAW
     screen.fill(BACKGROUND_COLOR)
 
