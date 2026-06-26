@@ -49,6 +49,14 @@ class Enemy:
         self.rect.x += direction.x * self.speed * dt
         self.rect.y += direction.y * self.speed * dt
 
+    def take_damage(self, amount):
+        
+        #Resta vida al enemigo
+        self.health -= amount
+
+        #Retorna si la vida es menor a 0 o no
+        return self.health <= 0
+
     def draw(self, screen):
 
         pygame.draw.rect(screen, self.color, self.rect)
