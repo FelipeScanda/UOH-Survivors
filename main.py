@@ -188,6 +188,13 @@ while running:
 
             xp_gems.remove(gem)
 
+    #Detecta si la vida del jugador llegó a 0
+    if player.health <= 0:
+
+        print("GAME OVER")
+
+        running = False
+
     # DRAW
     screen.fill(BACKGROUND_COLOR)
 
