@@ -20,6 +20,9 @@ pygame.display.set_caption(TITLE)
 # Controlador de FPS
 clock = pygame.time.Clock()
 
+#Fuente del texto
+font = pygame.font.SysFont(None, 36)
+
 # Crear jugador
 player = Player(WIDTH // 2, HEIGHT // 2)
 
@@ -212,6 +215,29 @@ while running:
     #Dibujar gemas de experiencia
     for gem in xp_gems:
         gem.draw(screen)
+
+    #Dibuja la UI
+    health_text = font.render(
+        f"HP: {player.health}",
+        True,
+        (255, 255, 255)
+    )
+
+    level_text = font.render(
+        f"Level: {player.level}",
+        True,
+        (255, 255, 255)
+    )
+
+    xp_text = font.render(
+        f"XP: {player.xp}",
+        True,
+        (255, 255, 255)
+    )
+
+    screen.blit(health_text, (20, 20))
+    screen.blit(level_text, (20, 60))
+    screen.blit(xp_text, (20, 100))
 
     # Actualizar pantalla
     pygame.display.flip()
