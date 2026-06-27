@@ -28,6 +28,12 @@ class Player:
         self.xp = 0
         self.level = 1
 
+        #Vida
+        self.max_health = 100
+        self.health = self.max_health
+
+        self.invulnerability_timer = 0
+
     def handle_movement(self, dt):
 
         # Obtener teclas presionadas
@@ -115,3 +121,13 @@ class Player:
             self.level += 1
 
             print(f"Subiste a nivel {self.level}")
+    
+    def take_damage(self, amount):
+
+        # Ignorar daño si es invulnerable
+        if self.invulnerability_timer > 0:
+            return
+
+        self.health -= amount
+
+        self.invulnerability_timer = 1

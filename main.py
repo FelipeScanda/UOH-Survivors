@@ -91,6 +91,10 @@ while running:
     #Actualiza jugador
     player.handle_movement(dt)
 
+    #Actualiza timer de invulnerabilidad
+    if player.invulnerability_timer > 0:
+        player.invulnerability_timer -= dt
+
     #Actualiza temporizador de disparo
     player.shoot_timer -= dt
 
@@ -124,6 +128,13 @@ while running:
     #Actualiza enemigos
     for enemy in enemies:
         enemy.update(player, dt)
+
+    #Detecta colisiones de enemigos con el jugador
+    for enemy in enemies:
+
+        if enemy.rect.colliderect(player.rect):
+
+            player.take_damage(10)
 
     #Actualiza proyectiles
     for projectile in projectiles:
@@ -176,6 +187,13 @@ while running:
             player.gain_xp(gem.value)
 
             xp_gems.remove(gem)
+
+    #Detecta si la vida del jugador llegó a 0
+    if player.health <= 0:
+
+        print("GAME OVER")
+
+        running = False
 
     # DRAW
     screen.fill(BACKGROUND_COLOR)
