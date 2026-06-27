@@ -129,6 +129,13 @@ while running:
     for enemy in enemies:
         enemy.update(player, dt)
 
+    #Detecta colisiones de enemigos con el jugador
+    for enemy in enemies:
+
+        if enemy.rect.colliderect(player.rect):
+
+            player.take_damage(10)
+
     #Actualiza proyectiles
     for projectile in projectiles:
         projectile.update(dt)
