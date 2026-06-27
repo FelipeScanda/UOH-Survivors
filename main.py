@@ -91,6 +91,10 @@ while running:
     #Actualiza jugador
     player.handle_movement(dt)
 
+    #Actualiza timer de invulnerabilidad
+    if player.invulnerability_timer > 0:
+        player.invulnerability_timer -= dt
+
     #Actualiza temporizador de disparo
     player.shoot_timer -= dt
 
