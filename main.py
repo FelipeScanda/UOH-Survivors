@@ -77,6 +77,15 @@ def spawn_enemy():
 # Variable principal del game loop
 running = True
 
+#Estado de level up
+level_up_menu = False
+
+upgrade_options = [
+    "Damage",
+    "Attack Speed",
+    "Move Speed"
+]
+
 # GAME LOOP
 while running:
 
@@ -90,113 +99,139 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        #Seleccion de mejoras del menu de level up
+        if level_up_menu and event.type == pygame.KEYDOWN:
+
+            if event.key == pygame.K_1:
+
+                player.damage += 1
+
+                level_up_menu = False
+
+            elif event.key == pygame.K_2:
+
+                player.shoot_cooldown *= 0.9
+
+                level_up_menu = False
+
+            elif event.key == pygame.K_3:
+
+                player.speed += 50
+
+                level_up_menu = False
+
     # UPDATE
-    #Actualiza jugador
-    player.handle_movement(dt)
+    if not level_up_menu:
 
-    #Actualiza timer de invulnerabilidad
-    if player.invulnerability_timer > 0:
-        player.invulnerability_timer -= dt
+        #Actualiza jugador
+        player.handle_movement(dt)
 
-    #Actualiza temporizador de disparo
-    player.shoot_timer -= dt
+        #Actualiza timer de invulnerabilidad
+        if player.invulnerability_timer > 0:
+            player.invulnerability_timer -= dt
 
-    #Actualiza tempórizador de spawn de enemigos
-    enemy_spawn_timer += dt
+        #Actualiza temporizador de disparo
+        player.shoot_timer -= dt
 
-    #Spawn automatico de enemigos
-    if enemy_spawn_timer >= enemy_spawn_cooldown:
+        #Actualiza tempórizador de spawn de enemigos
+        enemy_spawn_timer += dt
 
-        spawn_enemy()
+        #Spawn automatico de enemigos
+        if enemy_spawn_timer >= enemy_spawn_cooldown:
 
-        enemy_spawn_timer = 0
+            spawn_enemy()
 
-    #Disparo automático
-    if player.shoot_timer <= 0:
+            enemy_spawn_timer = 0
 
-        direction = player.shoot(enemies)
+        #Disparo automático
+        if player.shoot_timer <= 0:
 
-        if direction:
+            direction = player.shoot(enemies)
 
-            projectile = Projectile(
-                player.rect.centerx,
-                player.rect.centery,
-                direction
+            if direction:
+
+                projectile = Projectile(
+                    player.rect.centerx,
+                    player.rect.centery,
+                    direction
+                )
+
+                projectiles.append(projectile)
+
+                player.shoot_timer = player.shoot_cooldown
+
+        #Actualiza enemigos
+        for enemy in enemies:
+            enemy.update(player, dt)
+
+        #Detecta colisiones de enemigos con el jugador
+        for enemy in enemies:
+
+            if enemy.rect.colliderect(player.rect):
+
+                player.take_damage(10)
+
+        #Actualiza proyectiles
+        for projectile in projectiles:
+            projectile.update(dt)
+
+        for projectile in projectiles[:]:
+
+            projectile_rect = pygame.Rect(
+                projectile.position.x - projectile.radius,
+                projectile.position.y - projectile.radius,
+                projectile.radius * 2,
+                projectile.radius * 2
             )
 
-            projectiles.append(projectile)
+            for enemy in enemies[:]:
 
-            player.shoot_timer = player.shoot_cooldown
+                if projectile_rect.colliderect(enemy.rect):
 
-    #Actualiza enemigos
-    for enemy in enemies:
-        enemy.update(player, dt)
+                    died = enemy.take_damage(player.damage)
 
-    #Detecta colisiones de enemigos con el jugador
-    for enemy in enemies:
+                    # Eliminar proyectil
+                    if projectile in projectiles:
+                        projectiles.remove(projectile)
 
-        if enemy.rect.colliderect(player.rect):
+                    # Si enemigo murió
+                    if died:
 
-            player.take_damage(10)
+                        xp_gem = XPGem(
+                            enemy.rect.centerx,
+                            enemy.rect.centery
+                        )
 
-    #Actualiza proyectiles
-    for projectile in projectiles:
-        projectile.update(dt)
+                        xp_gems.append(xp_gem)
 
-    for projectile in projectiles[:]:
+                        enemies.remove(enemy)
 
-        projectile_rect = pygame.Rect(
-            projectile.position.x - projectile.radius,
-            projectile.position.y - projectile.radius,
-            projectile.radius * 2,
-            projectile.radius * 2
+                    break
+
+        player_center = pygame.Vector2(
+            player.rect.centerx,
+            player.rect.centery
         )
 
-        for enemy in enemies[:]:
+        for gem in xp_gems[:]:
 
-            if projectile_rect.colliderect(enemy.rect):
+            distance = player_center.distance_to(gem.position)
 
-                died = enemy.take_damage(1)
+            if distance < 30:
 
-                # Eliminar proyectil
-                if projectile in projectiles:
-                    projectiles.remove(projectile)
+                leveled_up = player.gain_xp(gem.value)
 
-                # Si enemigo murió
-                if died:
+                if leveled_up:
+                    level_up_menu = True
 
-                    xp_gem = XPGem(
-                        enemy.rect.centerx,
-                        enemy.rect.centery
-                    )
+                xp_gems.remove(gem)
 
-                    xp_gems.append(xp_gem)
+        #Detecta si la vida del jugador llegó a 0
+        if player.health <= 0:
 
-                    enemies.remove(enemy)
+            print("GAME OVER")
 
-                break
-
-    player_center = pygame.Vector2(
-        player.rect.centerx,
-        player.rect.centery
-    )
-
-    for gem in xp_gems[:]:
-
-        distance = player_center.distance_to(gem.position)
-
-        if distance < 30:
-
-            player.gain_xp(gem.value)
-
-            xp_gems.remove(gem)
-
-    #Detecta si la vida del jugador llegó a 0
-    if player.health <= 0:
-
-        print("GAME OVER")
-
-        running = False
+            running = False
 
     # DRAW
     screen.fill(BACKGROUND_COLOR)
@@ -238,6 +273,38 @@ while running:
     screen.blit(health_text, (20, 20))
     screen.blit(level_text, (20, 60))
     screen.blit(xp_text, (20, 100))
+
+    #Dibuja el menu de level up
+    if level_up_menu:
+
+        menu_text = font.render(
+            "LEVEL UP! Escoge una mejora:",
+            True,
+            (255, 255, 0)
+        )
+
+        option_1 = font.render(
+            "1 - Más Daño",
+            True,
+            (255, 255, 255)
+        )
+
+        option_2 = font.render(
+            "2 - Más velocidad de ataque",
+            True,
+            (255, 255, 255)
+        )
+
+        option_3 = font.render(
+            "3 - Más velocidad de movimiento",
+            True,
+            (255, 255, 255)
+        )
+
+        screen.blit(menu_text, (400, 250))
+        screen.blit(option_1, (400, 320))
+        screen.blit(option_2, (400, 370))
+        screen.blit(option_3, (400, 420))
 
     # Actualizar pantalla
     pygame.display.flip()

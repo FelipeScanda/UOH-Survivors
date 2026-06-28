@@ -17,6 +17,9 @@ class Player:
         # Velocidad
         self.speed = 300
 
+        #Daño
+        self.damage = 1
+
         # Color
         self.color = (50, 200, 50)
 
@@ -120,7 +123,9 @@ class Player:
             self.xp = 0
             self.level += 1
 
-            print(f"Subiste a nivel {self.level}")
+            return True
+        
+        return False
     
     def take_damage(self, amount):
 
