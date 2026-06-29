@@ -309,6 +309,15 @@ while running:
 
     screen.blit(level_text, (20, 90))
 
+    #Dibuja el tiempo de la partida
+    time_text = font.render(
+        f"Time: {int(game_time)}s",
+        True,
+        (255, 255, 255)
+    )
+
+    screen.blit(time_text, (20, 130))
+
     #Dibuja el menu de level up
     if level_up_menu:
 
