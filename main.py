@@ -44,7 +44,6 @@ xp_gems = []
 
 #Genera 5 enemigos
 for i in range(5):
-
     enemy = Enemy(
         random.randint(0, WIDTH),
         random.randint(0, HEIGHT)
@@ -54,7 +53,6 @@ for i in range(5):
 
 #Funcion para spawnear enemigos
 def spawn_enemy():
-
     side = random.randint(0, 3)
 
     if side == 0:  # arriba
@@ -95,41 +93,31 @@ upgrade_options = [
 
 # GAME LOOP
 while running:
-
     # Delta time
     dt = clock.tick(FPS) / 1000
 
     # EVENTOS
     for event in pygame.event.get():
-
         # Detectar cierre de ventana
         if event.type == pygame.QUIT:
             running = False
 
         #Seleccion de mejoras del menu de level up
         if level_up_menu and event.type == pygame.KEYDOWN:
-
             if event.key == pygame.K_1:
-
                 player.damage += 1
-
                 level_up_menu = False
 
             elif event.key == pygame.K_2:
-
                 player.shoot_cooldown *= 0.9
-
                 level_up_menu = False
 
             elif event.key == pygame.K_3:
-
                 player.speed += 50
-
                 level_up_menu = False
 
     # UPDATE
     if not level_up_menu:
-
         #Actualiza jugador
         player.handle_movement(dt)
 
@@ -143,7 +131,7 @@ while running:
         #Actualiza temporizador de disparo
         player.shoot_timer -= dt
 
-        #Actualiza tempórizador de spawn de enemigos
+        #Actualiza temporizador de spawn de enemigos
         enemy_spawn_timer += dt
 
         #Cooldown de spawneo de enemigos
@@ -151,18 +139,14 @@ while running:
 
         #Spawn automatico de enemigos
         if enemy_spawn_timer >= enemy_spawn_cooldown:
-
             spawn_enemy()
-
             enemy_spawn_timer = 0
 
         #Disparo automático
         if player.shoot_timer <= 0:
-
             direction = player.shoot(enemies)
 
             if direction:
-
                 projectile = Projectile(
                     player.rect.centerx,
                     player.rect.centery,
@@ -170,7 +154,6 @@ while running:
                 )
 
                 projectiles.append(projectile)
-
                 player.shoot_timer = player.shoot_cooldown
 
         #Actualiza enemigos
@@ -179,9 +162,7 @@ while running:
 
         #Detecta colisiones de enemigos con el jugador
         for enemy in enemies:
-
             if enemy.rect.colliderect(player.rect):
-
                 player.take_damage(10)
 
         #Actualiza proyectiles
@@ -189,7 +170,6 @@ while running:
             projectile.update(dt)
 
         for projectile in projectiles[:]:
-
             projectile_rect = pygame.Rect(
                 projectile.position.x - projectile.radius,
                 projectile.position.y - projectile.radius,
@@ -198,9 +178,7 @@ while running:
             )
 
             for enemy in enemies[:]:
-
                 if projectile_rect.colliderect(enemy.rect):
-
                     died = enemy.take_damage(player.damage)
 
                     # Eliminar proyectil
@@ -209,14 +187,12 @@ while running:
 
                     # Si enemigo murió
                     if died:
-
                         xp_gem = XPGem(
                             enemy.rect.centerx,
                             enemy.rect.centery
                         )
 
                         xp_gems.append(xp_gem)
-
                         enemies.remove(enemy)
 
                     break
@@ -227,11 +203,9 @@ while running:
         )
 
         for gem in xp_gems[:]:
-
             distance = player_center.distance_to(gem.position)
 
             if distance < 30:
-
                 leveled_up = player.gain_xp(gem.value)
 
                 if leveled_up:
@@ -241,9 +215,7 @@ while running:
 
         #Detecta si la vida del jugador llegó a 0
         if player.health <= 0:
-
             print("GAME OVER")
-
             running = False
 
     # DRAW
@@ -285,7 +257,6 @@ while running:
 
     #Barra de XP
     xp_needed = player.level * 5
-
     xp_ratio = player.xp / xp_needed
 
     pygame.draw.rect(
@@ -320,7 +291,6 @@ while running:
 
     #Dibuja el menu de level up
     if level_up_menu:
-
         menu_text = font.render(
             "LEVEL UP! Escoge una mejora:",
             True,
