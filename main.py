@@ -216,28 +216,50 @@ while running:
     for gem in xp_gems:
         gem.draw(screen)
 
-    #Dibuja la UI
-    health_text = font.render(
-        f"HP: {player.health}",
-        True,
-        (255, 255, 255)
+    #Barra de vida
+    bar_width = 250
+    bar_height = 25
+
+    health_ratio = player.health / player.max_health
+
+    pygame.draw.rect(
+        screen,
+        (100, 0, 0),
+        (20, 20, bar_width, bar_height)
     )
 
+    #Vida actual
+    pygame.draw.rect(
+        screen,
+        (255, 0, 0),
+        (20, 20, bar_width * health_ratio, bar_height)
+    )
+
+    #Barra de XP
+    xp_needed = player.level * 5
+
+    xp_ratio = player.xp / xp_needed
+
+    pygame.draw.rect(
+        screen,
+        (40, 40, 40),
+        (20, 60, bar_width, 20)
+    )
+
+    pygame.draw.rect(
+        screen,
+        (50, 150, 255),
+        (20, 60, bar_width * xp_ratio, 20)
+    )
+
+    #Nivel
     level_text = font.render(
-        f"Level: {player.level}",
+        f"Level {player.level}",
         True,
         (255, 255, 255)
     )
 
-    xp_text = font.render(
-        f"XP: {player.xp}",
-        True,
-        (255, 255, 255)
-    )
-
-    screen.blit(health_text, (20, 20))
-    screen.blit(level_text, (20, 60))
-    screen.blit(xp_text, (20, 100))
+    screen.blit(level_text, (20, 90))
 
     # Actualizar pantalla
     pygame.display.flip()
