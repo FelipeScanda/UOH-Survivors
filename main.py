@@ -71,7 +71,13 @@ def spawn_enemy():
         x = WIDTH + 50
         y = random.randint(0, HEIGHT)
 
-    enemy = Enemy(x, y)
+    #Probabilidad de spawn de enemigos
+    enemy_type = random.choices(
+        ["normal", "fast", "tank"],
+        weights=[70, 20, 10]
+    )[0]
+
+    enemy = Enemy(x, y, enemy_type)
 
     #Aumentar las estadisticas de los enemigos con el tiempo
     enemy.health += int(game_time // 20)
@@ -191,6 +197,13 @@ while running:
                             enemy.rect.centerx,
                             enemy.rect.centery
                         )
+
+                        #Distintas recompensas segun el tipo de enemigo
+                        if enemy.enemy_type == "fast":
+                            xp_gem.value = 2
+
+                        elif enemy.enemy_type == "tank":
+                            xp_gem.value = 5
 
                         xp_gems.append(xp_gem)
                         enemies.remove(enemy)
