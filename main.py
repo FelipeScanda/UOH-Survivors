@@ -33,6 +33,9 @@ enemies = []
 enemy_spawn_timer = 0
 enemy_spawn_cooldown = 2
 
+#Contador de tiempo de la partida
+game_time = 0
+
 #Crear proyectiles
 projectiles = []
 
@@ -71,6 +74,10 @@ def spawn_enemy():
         y = random.randint(0, HEIGHT)
 
     enemy = Enemy(x, y)
+
+    #Aumentar las estadisticas de los enemigos con el tiempo
+    enemy.health += int(game_time // 20)
+    enemy.speed += game_time * 0.5
 
     enemies.append(enemy)
 
@@ -126,6 +133,9 @@ while running:
         #Actualiza jugador
         player.handle_movement(dt)
 
+        #Actualiza tiempo de juego
+        game_time += dt
+
         #Actualiza timer de invulnerabilidad
         if player.invulnerability_timer > 0:
             player.invulnerability_timer -= dt
@@ -135,6 +145,9 @@ while running:
 
         #Actualiza tempórizador de spawn de enemigos
         enemy_spawn_timer += dt
+
+        #Cooldown de spawneo de enemigos
+        current_spawn_cooldown = max(0.3, enemy_spawn_cooldown - (game_time * 0.02))
 
         #Spawn automatico de enemigos
         if enemy_spawn_timer >= enemy_spawn_cooldown:
