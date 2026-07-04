@@ -379,106 +379,107 @@ while running:
     # DRAW
     screen.fill(BACKGROUND_COLOR)
 
-    #Grid infinita
-    grid_color = (40, 40, 40)
+    if game_state in ["playing", "paused", "game_over"]:
+        #Grid infinita
+        grid_color = (40, 40, 40)
 
-    # Offset visual de la cámara
-    offset_x = int(camera_offset.x % GRID_SIZE)
-    offset_y = int(camera_offset.y % GRID_SIZE)
+        # Offset visual de la cámara
+        offset_x = int(camera_offset.x % GRID_SIZE)
+        offset_y = int(camera_offset.y % GRID_SIZE)
 
-    # Líneas verticales
-    for x in range(-GRID_SIZE, WIDTH + GRID_SIZE, GRID_SIZE):
-        pygame.draw.line(
+        # Líneas verticales
+        for x in range(-GRID_SIZE, WIDTH + GRID_SIZE, GRID_SIZE):
+            pygame.draw.line(
+                screen,
+                grid_color,
+                (x - offset_x, 0),
+                (x - offset_x, HEIGHT)
+            )
+
+        # Líneas horizontales
+        for y in range(-GRID_SIZE, HEIGHT + GRID_SIZE, GRID_SIZE):
+            pygame.draw.line(
+                screen,
+                grid_color,
+                (0, y - offset_y),
+                (WIDTH, y - offset_y)
+            )
+
+        #Dibujar al jugador
+        player.draw(screen, camera_offset)
+
+        #Dibuja los orbes
+        for orb in orbs:
+            orb.draw(screen, camera_offset)
+
+        #Dibujar enemigos
+        for enemy in enemies:
+            enemy.draw(screen, camera_offset)
+
+        #Dibujar proyectiles
+        for projectile in projectiles:
+            projectile.draw(screen, camera_offset)
+
+        #Dibujar gemas de experiencia
+        for gem in xp_gems:
+            gem.draw(screen, camera_offset)
+
+        #Dibuja items de orbe
+        for item in orb_items:
+            item.draw(screen, camera_offset)
+
+        #Barra de vida
+        bar_width = 250
+        bar_height = 25
+
+        health_ratio = player.health / player.max_health
+
+        pygame.draw.rect(
             screen,
-            grid_color,
-            (x - offset_x, 0),
-            (x - offset_x, HEIGHT)
+            (100, 0, 0),
+            (20, 20, bar_width, bar_height)
         )
 
-    # Líneas horizontales
-    for y in range(-GRID_SIZE, HEIGHT + GRID_SIZE, GRID_SIZE):
-        pygame.draw.line(
+        #Vida actual
+        pygame.draw.rect(
             screen,
-            grid_color,
-            (0, y - offset_y),
-            (WIDTH, y - offset_y)
+            (255, 0, 0),
+            (20, 20, bar_width * health_ratio, bar_height)
         )
 
-    #Dibujar al jugador
-    player.draw(screen, camera_offset)
+        #Barra de XP
+        xp_needed = player.level * 5
+        xp_ratio = player.xp / xp_needed
 
-    #Dibuja los orbes
-    for orb in orbs:
-        orb.draw(screen, camera_offset)
+        pygame.draw.rect(
+            screen,
+            (40, 40, 40),
+            (20, 60, bar_width, 20)
+        )
 
-    #Dibujar enemigos
-    for enemy in enemies:
-        enemy.draw(screen, camera_offset)
+        pygame.draw.rect(
+            screen,
+            (50, 150, 255),
+            (20, 60, bar_width * xp_ratio, 20)
+        )
 
-    #Dibujar proyectiles
-    for projectile in projectiles:
-        projectile.draw(screen, camera_offset)
+        #Nivel
+        level_text = font.render(
+            f"Level {player.level}",
+            True,
+            (255, 255, 255)
+        )
 
-    #Dibujar gemas de experiencia
-    for gem in xp_gems:
-        gem.draw(screen, camera_offset)
+        screen.blit(level_text, (20, 90))
 
-    #Dibuja items de orbe
-    for item in orb_items:
-        item.draw(screen, camera_offset)
+        #Dibuja el tiempo de la partida
+        time_text = font.render(
+            f"Time: {int(game_time)}s",
+            True,
+            (255, 255, 255)
+        )
 
-    #Barra de vida
-    bar_width = 250
-    bar_height = 25
-
-    health_ratio = player.health / player.max_health
-
-    pygame.draw.rect(
-        screen,
-        (100, 0, 0),
-        (20, 20, bar_width, bar_height)
-    )
-
-    #Vida actual
-    pygame.draw.rect(
-        screen,
-        (255, 0, 0),
-        (20, 20, bar_width * health_ratio, bar_height)
-    )
-
-    #Barra de XP
-    xp_needed = player.level * 5
-    xp_ratio = player.xp / xp_needed
-
-    pygame.draw.rect(
-        screen,
-        (40, 40, 40),
-        (20, 60, bar_width, 20)
-    )
-
-    pygame.draw.rect(
-        screen,
-        (50, 150, 255),
-        (20, 60, bar_width * xp_ratio, 20)
-    )
-
-    #Nivel
-    level_text = font.render(
-        f"Level {player.level}",
-        True,
-        (255, 255, 255)
-    )
-
-    screen.blit(level_text, (20, 90))
-
-    #Dibuja el tiempo de la partida
-    time_text = font.render(
-        f"Time: {int(game_time)}s",
-        True,
-        (255, 255, 255)
-    )
-
-    screen.blit(time_text, (20, 130))
+        screen.blit(time_text, (20, 130))
 
     #Dibuja el menu de level up
     if level_up_menu:
