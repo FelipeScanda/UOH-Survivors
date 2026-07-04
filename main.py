@@ -100,8 +100,59 @@ def redistribute_orbs():
     for index, orb in enumerate(orbs):
         orb.set_angle(index * angle_step)
 
+#Botones reutilizables
+def draw_button(text, x, y, width, height):
+    mouse_pos = pygame.mouse.get_pos()
+    button_rect = pygame.Rect(x, y, width, height)
+    hovered = button_rect.collidepoint(mouse_pos)
+    color = (100, 100, 100)
+
+    if hovered:
+        color = (150, 150, 150)
+
+    pygame.draw.rect(screen, color, button_rect)
+
+    label = font.render(
+        text,
+        True,
+        (255, 255, 255)
+    )
+
+    label_rect = label.get_rect(center=button_rect.center)
+    screen.blit(label, label_rect)
+    return button_rect
+
+#Funcion para restart
+def reset_game():
+
+    global player
+    global enemies
+    global projectiles
+    global xp_gems
+    global orb_items
+    global orbs
+    global game_time
+    global enemy_spawn_timer
+    global level_up_menu
+
+    player = Player(WIDTH // 2, HEIGHT // 2)
+
+    enemies = []
+    projectiles = []
+    xp_gems = []
+    orb_items = []
+    orbs = []
+
+    game_time = 0
+    enemy_spawn_timer = 0
+
+    level_up_menu = False
+
 # Variable principal del game loop
 running = True
+
+#Variable del estado del juego (se parte en el menu principal)
+game_state = "menu"
 
 #Estado de level up
 level_up_menu = False
@@ -123,6 +174,16 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        #Boton de pausa
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+
+                if game_state == "playing":
+                    game_state = "paused"
+
+                elif game_state == "paused":
+                    game_state = "playing"
+
         #Seleccion de mejoras del menu de level up
         if level_up_menu and event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1:
@@ -138,7 +199,7 @@ while running:
                 level_up_menu = False
 
     # UPDATE
-    if not level_up_menu:
+    if game_state == "playing" and not level_up_menu:
         #Actualiza jugador
         player.handle_movement(dt)
 
@@ -313,8 +374,7 @@ while running:
 
         #Detecta si la vida del jugador llegó a 0
         if player.health <= 0:
-            print("GAME OVER")
-            running = False
+            game_state = "game_over"
 
     # DRAW
     screen.fill(BACKGROUND_COLOR)
@@ -450,6 +510,77 @@ while running:
         screen.blit(option_1, (400, 320))
         screen.blit(option_2, (400, 370))
         screen.blit(option_3, (400, 420))
+
+    #Menu principal
+    if game_state == "menu":
+        title = font.render("UOH SURVIVORS", True, (255, 255, 0))
+
+        title_rect = title.get_rect(center=(WIDTH // 2, 180))
+
+        screen.blit(title, title_rect)
+
+        play_button = draw_button("Jugar",WIDTH // 2 - 150,320,300,60)
+
+        quit_button = draw_button("Salir",WIDTH // 2 - 150,440,300,60)
+
+        if pygame.mouse.get_pressed()[0]:
+
+            if play_button.collidepoint(pygame.mouse.get_pos()):
+                reset_game()
+                game_state = "playing"
+
+            elif quit_button.collidepoint(pygame.mouse.get_pos()):
+                running = False
+
+    #Pantalla de pausa
+    if game_state == "paused":
+        pause_text = font.render("PAUSA", True, (255, 255, 0))
+
+        pause_rect = pause_text.get_rect(center=(WIDTH // 2, 180))
+
+        screen.blit(pause_text, pause_rect)
+
+        continue_button = draw_button("Continuar",WIDTH // 2 - 150,260,300,60)
+
+        menu_button = draw_button("Menu Principal",WIDTH // 2 - 150,360,300,60)
+
+        quit_button = draw_button("Salir",WIDTH // 2 - 150,460,300,60)
+
+        if pygame.mouse.get_pressed()[0]:
+            if continue_button.collidepoint(pygame.mouse.get_pos()):
+                game_state = "playing"
+
+            elif menu_button.collidepoint(pygame.mouse.get_pos()):
+                game_state = "menu"
+
+            elif quit_button.collidepoint(pygame.mouse.get_pos()):
+                running = False
+
+    #Pantalla Gameover
+    if game_state == "game_over":
+        over_text = font.render("GAME OVER", True, (255, 0, 0))
+
+        over_rect = over_text.get_rect(center=(WIDTH // 2, 180))
+
+        screen.blit(over_text, over_rect)
+
+        retry_button = draw_button("Reintentar",WIDTH // 2 - 150,260,300,60)
+
+        menu_button = draw_button("Menu Principal",WIDTH // 2 - 150,360,300,60)
+
+        quit_button = draw_button("Salir",WIDTH // 2 - 150,460,300,60)
+
+        if pygame.mouse.get_pressed()[0]:
+
+            if retry_button.collidepoint(pygame.mouse.get_pos()):
+                reset_game()
+                game_state = "playing"
+
+            elif menu_button.collidepoint(pygame.mouse.get_pos()):
+                game_state = "menu"
+
+            elif quit_button.collidepoint(pygame.mouse.get_pos()):
+                running = False
 
     # Actualizar pantalla
     pygame.display.flip()
