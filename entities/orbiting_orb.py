@@ -8,7 +8,7 @@ class OrbitingOrb:
         #Radio de los orbes
         self.radius = 12
         #Distancia de giro
-        self.distance = 100
+        self.distance = 50
         #Angulo de giro
         self.angle = starting_angle
         #Velocidad de rotacion
