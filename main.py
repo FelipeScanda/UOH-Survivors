@@ -7,6 +7,7 @@ from entities.player import Player
 from entities.enemy import Enemy
 from entities.projectile import Projectile
 from entities.xp_gem import XPGem
+from entities.orbiting_orb import OrbitingOrb
 
 from items.orb_item import OrbItem
 
