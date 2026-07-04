@@ -2,7 +2,7 @@ import pygame
 import math
 
 class OrbitingOrb:
-    def __init__(self, player):
+    def __init__(self, player, starting_angle=0):
         #Jugador que tiene el arma
         self.player = player
         #Radio de los orbes
@@ -10,7 +10,7 @@ class OrbitingOrb:
         #Distancia de giro
         self.distance = 100
         #Angulo de giro
-        self.angle = 0
+        self.angle = starting_angle
         #Velocidad de rotacion
         self.rotation_speed = 3
         #Daño

@@ -7,7 +7,8 @@ from entities.player import Player
 from entities.enemy import Enemy
 from entities.projectile import Projectile
 from entities.xp_gem import XPGem
-from entities.orbiting_orb import OrbitingOrb
+
+from items.orb_item import OrbItem
 
 # Inicializa todos los módulos de pygame
 pygame.init()
@@ -27,9 +28,6 @@ font = pygame.font.SysFont(None, 36)
 # Crear jugador
 player = Player(WIDTH // 2, HEIGHT // 2)
 
-#Crear orbes alrededor del jugador
-orb = OrbitingOrb(player)
-
 #Crear enemigos
 enemies = []
 
@@ -45,6 +43,10 @@ projectiles = []
 
 #Crear gemas de experiencia
 xp_gems = []
+
+#Crear orbes e items de orbes
+orbs = []
+orb_items = []
 
 #Genera 5 enemigos
 for i in range(5):
@@ -132,7 +134,8 @@ while running:
         player.handle_movement(dt)
 
         #Actualiza orbes
-        orb.update(dt)
+        for orb in orbs:
+            orb.update(dt)
 
         #Actualiza tiempo de juego
         game_time += dt
@@ -179,31 +182,41 @@ while running:
                 player.take_damage(10)
 
         #Detecta colision de orbes con los enemigos
-        orb_rect = pygame.Rect(
-            orb.position.x - orb.radius,
-            orb.position.y - orb.radius,
-            orb.radius * 2,
-            orb.radius * 2
-        )
+        for orb in orbs:
+            orb_rect = pygame.Rect(
+                orb.position.x - orb.radius,
+                orb.position.y - orb.radius,
+                orb.radius * 2,
+                orb.radius * 2
+            )
 
-        for enemy in enemies[:]:
+            for enemy in enemies[:]:
 
-            if orb_rect.colliderect(enemy.rect):
-                #Detecta el cooldown de daño del enemigo, si no tiene cooldown, le hace daño y setea el nuevo cooldown
-                if enemy.damage_cooldown <= 0:
-                    died = enemy.take_damage(orb.damage)
-                    enemy.damage_cooldown = 0.5
+                if orb_rect.colliderect(enemy.rect):
+                    #Detecta el cooldown de daño del enemigo, si no tiene cooldown, le hace daño y setea el nuevo cooldown
+                    if enemy.damage_cooldown <= 0:
+                        died = enemy.take_damage(orb.damage)
+                        enemy.damage_cooldown = 0.5
 
-                    if died:
+                        if died:
 
-                        xp_gem = XPGem(
-                            enemy.rect.centerx,
-                            enemy.rect.centery
-                        )
+                            xp_gem = XPGem(
+                                enemy.rect.centerx,
+                                enemy.rect.centery
+                            )
 
-                        xp_gems.append(xp_gem)
+                            xp_gems.append(xp_gem)
 
-                        enemies.remove(enemy)
+                            #Posibilidad de dropear un item de orbe
+                            if random.random() < 0.1:
+                                orb_item = OrbItem(
+                                    enemy.rect.centerx,
+                                    enemy.rect.centery
+                                )
+
+                                orb_items.append(orb_item)
+
+                            enemies.remove(enemy)
 
         #Actualiza proyectiles
         for projectile in projectiles:
@@ -240,6 +253,16 @@ while running:
                             xp_gem.value = 5
 
                         xp_gems.append(xp_gem)
+
+                        #Posibilidad de dropear un item de orbe
+                        if random.random() < 0.1:
+                            orb_item = OrbItem(
+                                enemy.rect.centerx,
+                                enemy.rect.centery
+                            )
+
+                            orb_items.append(orb_item)
+
                         enemies.remove(enemy)
 
                     break
@@ -249,6 +272,7 @@ while running:
             player.rect.centery
         )
 
+        #Recolecta gemas de xp
         for gem in xp_gems[:]:
             distance = player_center.distance_to(gem.position)
 
@@ -259,6 +283,20 @@ while running:
                     level_up_menu = True
 
                 xp_gems.remove(gem)
+
+        #Recolecta items de orbe
+        for item in orb_items[:]:
+            distance = player_center.distance_to(item.position)
+
+            if distance < 30:
+                angle = len(orbs) * 1.5
+
+                new_orb = OrbitingOrb(
+                    player,
+                    angle
+                )
+                orbs.append(new_orb)
+                orb_items.remove(item)
 
         #Detecta si la vida del jugador llegó a 0
         if player.health <= 0:
@@ -271,8 +309,9 @@ while running:
     #Dibujar al jugador
     player.draw(screen)
 
-    #Dibuja las orbes
-    orb.draw(screen)
+    #Dibuja los orbes
+    for orb in orbs:
+        orb.draw(screen)
 
     #Dibujar enemigos
     for enemy in enemies:
@@ -285,6 +324,10 @@ while running:
     #Dibujar gemas de experiencia
     for gem in xp_gems:
         gem.draw(screen)
+
+    #Dibuja items de orbe
+    for item in orb_items:
+        item.draw(screen)
 
     #Barra de vida
     bar_width = 250
