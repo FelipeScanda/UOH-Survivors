@@ -173,7 +173,7 @@ while running:
         current_spawn_cooldown = max(0.3, enemy_spawn_cooldown - (game_time * 0.02))
 
         #Spawn automatico de enemigos
-        if enemy_spawn_timer >= enemy_spawn_cooldown:
+        if enemy_spawn_timer >= current_spawn_cooldown:
             spawn_enemy()
             enemy_spawn_timer = 0
 
@@ -434,9 +434,6 @@ while running:
 
     # Actualizar pantalla
     pygame.display.flip()
-
-    # Limitar FPS
-    clock.tick(FPS)
 
 # Cierre limpio
 pygame.quit()
