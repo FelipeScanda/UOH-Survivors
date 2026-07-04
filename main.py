@@ -53,15 +53,6 @@ xp_gems = []
 orbs = []
 orb_items = []
 
-#Genera 5 enemigos
-for i in range(5):
-    enemy = Enemy(
-        random.randint(0, WIDTH),
-        random.randint(0, HEIGHT)
-    )
-
-    enemies.append(enemy)
-
 #Funcion para spawnear enemigos
 def spawn_enemy():
     side = random.randint(0, 3)
