@@ -98,6 +98,13 @@ class Enemy:
         #Retorna si la vida es menor a 0 o no
         return self.health <= 0
 
-    def draw(self, screen):
+    def draw(self, screen, camera_offset):
 
-        pygame.draw.rect(screen, self.color, self.rect)
+        screen_rect = pygame.Rect(
+            self.rect.x - camera_offset.x,
+            self.rect.y - camera_offset.y,
+            self.width,
+            self.height
+        )
+
+        pygame.draw.rect(screen, self.color, screen_rect)

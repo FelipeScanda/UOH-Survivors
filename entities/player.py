@@ -14,6 +14,9 @@ class Player:
         # Rectángulo del jugador
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
+        #Posicion del jugador 
+        self.position = pygame.Vector2(x, y)
+
         # Velocidad
         self.speed = 300
 
@@ -67,8 +70,10 @@ class Player:
             movement = movement.normalize()
 
         # Aplicar movimiento usando delta time
-        self.rect.x += dx * self.speed * dt
-        self.rect.y += dy * self.speed * dt
+        self.position.x += movement.x * self.speed * dt
+        self.position.y += movement.y * self.speed * dt
+
+        self.rect.center = (int(self.position.x), int(self.position.y))
 
     def shoot(self, enemies):
 
@@ -105,9 +110,16 @@ class Player:
 
         return direction
 
-    def draw(self, screen):
+    def draw(self, screen, camera_offset):
 
-        pygame.draw.rect(screen, self.color, self.rect)
+        screen_rect = pygame.Rect(
+            self.rect.x - camera_offset.x,
+            self.rect.y - camera_offset.y,
+            self.width,
+            self.height
+        )
+
+        pygame.draw.rect(screen, self.color, screen_rect)
     
     def gain_xp(self, amount):
 

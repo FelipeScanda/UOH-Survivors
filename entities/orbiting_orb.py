@@ -38,11 +38,11 @@ class OrbitingOrb:
         self.position.x = x
         self.position.y = y
 
-    def draw(self, screen):
+    def draw(self, screen, camera_offset):
         pygame.draw.circle(
             screen,
             self.color,
-            (int(self.position.x), int(self.position.y)),
+            (int(self.position.x - camera_offset.x), int(self.position.y - camera_offset.y)),
             self.radius
         )
 

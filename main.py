@@ -24,6 +24,9 @@ pygame.display.set_caption(TITLE)
 # Controlador de FPS
 clock = pygame.time.Clock()
 
+#Camara
+camera_offset = pygame.Vector2()
+
 #Fuente del texto
 font = pygame.font.SysFont(None, 36)
 
@@ -144,6 +147,10 @@ while running:
     if not level_up_menu:
         #Actualiza jugador
         player.handle_movement(dt)
+
+        #Actualiza camara
+        camera_offset.x = player.position.x - WIDTH // 2
+        camera_offset.y = player.position.y - HEIGHT // 2
 
         #Actualiza orbes
         for orb in orbs:
@@ -319,27 +326,27 @@ while running:
     screen.fill(BACKGROUND_COLOR)
 
     #Dibujar al jugador
-    player.draw(screen)
+    player.draw(screen, camera_offset)
 
     #Dibuja los orbes
     for orb in orbs:
-        orb.draw(screen)
+        orb.draw(screen, camera_offset)
 
     #Dibujar enemigos
     for enemy in enemies:
-        enemy.draw(screen)
+        enemy.draw(screen, camera_offset)
 
     #Dibujar proyectiles
     for projectile in projectiles:
-        projectile.draw(screen)
+        projectile.draw(screen, camera_offset)
 
     #Dibujar gemas de experiencia
     for gem in xp_gems:
-        gem.draw(screen)
+        gem.draw(screen, camera_offset)
 
     #Dibuja items de orbe
     for item in orb_items:
-        item.draw(screen)
+        item.draw(screen, camera_offset)
 
     #Barra de vida
     bar_width = 250

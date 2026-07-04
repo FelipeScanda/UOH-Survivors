@@ -25,12 +25,12 @@ class Projectile:
         #Movimiento del proyectil
         self.position += self.direction * self.speed * dt
 
-    def draw(self, screen):
+    def draw(self, screen, camera_offset):
 
         #Dibujar el proyectil en pantalla
         pygame.draw.circle(
             screen,
             self.color,
-            (int(self.position.x), int(self.position.y)),
+            (int(self.position.x - camera_offset.x), int(self.position.y - camera_offset.y)),
             self.radius
         )
