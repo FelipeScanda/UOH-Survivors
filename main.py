@@ -27,6 +27,9 @@ clock = pygame.time.Clock()
 #Camara
 camera_offset = pygame.Vector2()
 
+#Tamaño de la grid (para dibujar el mapa)
+GRID_SIZE = 64
+
 #Fuente del texto
 font = pygame.font.SysFont(None, 36)
 
@@ -315,6 +318,31 @@ while running:
 
     # DRAW
     screen.fill(BACKGROUND_COLOR)
+
+    #Grid infinita
+    grid_color = (40, 40, 40)
+
+    # Offset visual de la cámara
+    offset_x = int(camera_offset.x % GRID_SIZE)
+    offset_y = int(camera_offset.y % GRID_SIZE)
+
+    # Líneas verticales
+    for x in range(-GRID_SIZE, WIDTH + GRID_SIZE, GRID_SIZE):
+        pygame.draw.line(
+            screen,
+            grid_color,
+            (x - offset_x, 0),
+            (x - offset_x, HEIGHT)
+        )
+
+    # Líneas horizontales
+    for y in range(-GRID_SIZE, HEIGHT + GRID_SIZE, GRID_SIZE):
+        pygame.draw.line(
+            screen,
+            grid_color,
+            (0, y - offset_y),
+            (WIDTH, y - offset_y)
+        )
 
     #Dibujar al jugador
     player.draw(screen, camera_offset)
