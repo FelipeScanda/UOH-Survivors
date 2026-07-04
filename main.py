@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import math
 
 from settings import *
 from entities.player import Player
@@ -91,6 +92,16 @@ def spawn_enemy():
     enemy.speed += game_time * 0.5
 
     enemies.append(enemy)
+
+#Funcion para redistribuir orbes
+def redistribute_orbs():
+    if len(orbs) == 0:
+        return
+
+    angle_step = (2 * math.pi) / len(orbs)
+
+    for index, orb in enumerate(orbs):
+        orb.set_angle(index * angle_step)
 
 # Variable principal del game loop
 running = True
@@ -290,13 +301,13 @@ while running:
             distance = player_center.distance_to(item.position)
 
             if distance < 30:
-                angle = len(orbs) * 1.5
-
-                new_orb = OrbitingOrb(
-                    player,
-                    angle
-                )
+                #Agregar nuevo orbe
+                new_orb = OrbitingOrb(player)
                 orbs.append(new_orb)
+
+                #Redistribuir los orbes
+                redistribute_orbs()
+
                 orb_items.remove(item)
 
         #Detecta si la vida del jugador llegó a 0

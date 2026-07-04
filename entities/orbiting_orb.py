@@ -45,3 +45,6 @@ class OrbitingOrb:
             (int(self.position.x), int(self.position.y)),
             self.radius
         )
+
+    def set_angle(self, angle):
+        self.angle = angle
