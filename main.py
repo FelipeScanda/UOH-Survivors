@@ -7,6 +7,7 @@ from entities.player import Player
 from entities.enemy import Enemy
 from entities.projectile import Projectile
 from entities.xp_gem import XPGem
+from entities.orbiting_orb import OrbitingOrb
 
 # Inicializa todos los módulos de pygame
 pygame.init()
@@ -25,6 +26,9 @@ font = pygame.font.SysFont(None, 36)
 
 # Crear jugador
 player = Player(WIDTH // 2, HEIGHT // 2)
+
+#Crear orbes alrededor del jugador
+orb = OrbitingOrb(player)
 
 #Crear enemigos
 enemies = []
@@ -127,6 +131,9 @@ while running:
         #Actualiza jugador
         player.handle_movement(dt)
 
+        #Actualiza orbes
+        orb.update(dt)
+
         #Actualiza tiempo de juego
         game_time += dt
 
@@ -170,6 +177,33 @@ while running:
         for enemy in enemies:
             if enemy.rect.colliderect(player.rect):
                 player.take_damage(10)
+
+        #Detecta colision de orbes con los enemigos
+        orb_rect = pygame.Rect(
+            orb.position.x - orb.radius,
+            orb.position.y - orb.radius,
+            orb.radius * 2,
+            orb.radius * 2
+        )
+
+        for enemy in enemies[:]:
+
+            if orb_rect.colliderect(enemy.rect):
+                #Detecta el cooldown de daño del enemigo, si no tiene cooldown, le hace daño y setea el nuevo cooldown
+                if enemy.damage_cooldown <= 0:
+                    died = enemy.take_damage(orb.damage)
+                    enemy.damage_cooldown = 0.5
+
+                    if died:
+
+                        xp_gem = XPGem(
+                            enemy.rect.centerx,
+                            enemy.rect.centery
+                        )
+
+                        xp_gems.append(xp_gem)
+
+                        enemies.remove(enemy)
 
         #Actualiza proyectiles
         for projectile in projectiles:
@@ -236,6 +270,9 @@ while running:
 
     #Dibujar al jugador
     player.draw(screen)
+
+    #Dibuja las orbes
+    orb.draw(screen)
 
     #Dibujar enemigos
     for enemy in enemies:

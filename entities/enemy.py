@@ -55,10 +55,17 @@ class Enemy:
             #Vida
             self.health = 8
 
+        #Cooldown de daño
+        self.damage_cooldown = 0
+
         #Rectángulo del enemigo
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
     def update(self, player, dt):
+
+        #Actualiza el cooldown de daño
+        if self.damage_cooldown > 0:
+            self.damage_cooldown -= dt
 
         # Posición jugador
         player_pos = pygame.Vector2(
