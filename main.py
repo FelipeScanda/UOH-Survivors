@@ -100,8 +100,59 @@ def redistribute_orbs():
     for index, orb in enumerate(orbs):
         orb.set_angle(index * angle_step)
 
+#Botones reutilizables
+def draw_button(text, x, y, width, height):
+    mouse_pos = pygame.mouse.get_pos()
+    button_rect = pygame.Rect(x, y, width, height)
+    hovered = button_rect.collidepoint(mouse_pos)
+    color = (100, 100, 100)
+
+    if hovered:
+        color = (150, 150, 150)
+
+    pygame.draw.rect(screen, color, button_rect)
+
+    label = font.render(
+        text,
+        True,
+        (255, 255, 255)
+    )
+
+    label_rect = label.get_rect(center=button_rect.center)
+    screen.blit(label, label_rect)
+    return button_rect
+
+#Funcion para restart
+def reset_game():
+
+    global player
+    global enemies
+    global projectiles
+    global xp_gems
+    global orb_items
+    global orbs
+    global game_time
+    global enemy_spawn_timer
+    global level_up_menu
+
+    player = Player(WIDTH // 2, HEIGHT // 2)
+
+    enemies = []
+    projectiles = []
+    xp_gems = []
+    orb_items = []
+    orbs = []
+
+    game_time = 0
+    enemy_spawn_timer = 0
+
+    level_up_menu = False
+
 # Variable principal del game loop
 running = True
+
+#Variable del estado del juego (se parte en el menu principal)
+game_state = "menu"
 
 #Estado de level up
 level_up_menu = False
@@ -123,6 +174,16 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        #Boton de pausa
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+
+                if game_state == "playing":
+                    game_state = "paused"
+
+                elif game_state == "paused":
+                    game_state = "playing"
+
         #Seleccion de mejoras del menu de level up
         if level_up_menu and event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1:
@@ -138,7 +199,7 @@ while running:
                 level_up_menu = False
 
     # UPDATE
-    if not level_up_menu:
+    if game_state == "playing" and not level_up_menu:
         #Actualiza jugador
         player.handle_movement(dt)
 
@@ -313,112 +374,112 @@ while running:
 
         #Detecta si la vida del jugador llegó a 0
         if player.health <= 0:
-            print("GAME OVER")
-            running = False
+            game_state = "game_over"
 
     # DRAW
     screen.fill(BACKGROUND_COLOR)
 
-    #Grid infinita
-    grid_color = (40, 40, 40)
+    if game_state in ["playing", "paused", "game_over"]:
+        #Grid infinita
+        grid_color = (40, 40, 40)
 
-    # Offset visual de la cámara
-    offset_x = int(camera_offset.x % GRID_SIZE)
-    offset_y = int(camera_offset.y % GRID_SIZE)
+        # Offset visual de la cámara
+        offset_x = int(camera_offset.x % GRID_SIZE)
+        offset_y = int(camera_offset.y % GRID_SIZE)
 
-    # Líneas verticales
-    for x in range(-GRID_SIZE, WIDTH + GRID_SIZE, GRID_SIZE):
-        pygame.draw.line(
+        # Líneas verticales
+        for x in range(-GRID_SIZE, WIDTH + GRID_SIZE, GRID_SIZE):
+            pygame.draw.line(
+                screen,
+                grid_color,
+                (x - offset_x, 0),
+                (x - offset_x, HEIGHT)
+            )
+
+        # Líneas horizontales
+        for y in range(-GRID_SIZE, HEIGHT + GRID_SIZE, GRID_SIZE):
+            pygame.draw.line(
+                screen,
+                grid_color,
+                (0, y - offset_y),
+                (WIDTH, y - offset_y)
+            )
+
+        #Dibujar al jugador
+        player.draw(screen, camera_offset)
+
+        #Dibuja los orbes
+        for orb in orbs:
+            orb.draw(screen, camera_offset)
+
+        #Dibujar enemigos
+        for enemy in enemies:
+            enemy.draw(screen, camera_offset)
+
+        #Dibujar proyectiles
+        for projectile in projectiles:
+            projectile.draw(screen, camera_offset)
+
+        #Dibujar gemas de experiencia
+        for gem in xp_gems:
+            gem.draw(screen, camera_offset)
+
+        #Dibuja items de orbe
+        for item in orb_items:
+            item.draw(screen, camera_offset)
+
+        #Barra de vida
+        bar_width = 250
+        bar_height = 25
+
+        health_ratio = player.health / player.max_health
+
+        pygame.draw.rect(
             screen,
-            grid_color,
-            (x - offset_x, 0),
-            (x - offset_x, HEIGHT)
+            (100, 0, 0),
+            (20, 20, bar_width, bar_height)
         )
 
-    # Líneas horizontales
-    for y in range(-GRID_SIZE, HEIGHT + GRID_SIZE, GRID_SIZE):
-        pygame.draw.line(
+        #Vida actual
+        pygame.draw.rect(
             screen,
-            grid_color,
-            (0, y - offset_y),
-            (WIDTH, y - offset_y)
+            (255, 0, 0),
+            (20, 20, bar_width * health_ratio, bar_height)
         )
 
-    #Dibujar al jugador
-    player.draw(screen, camera_offset)
+        #Barra de XP
+        xp_needed = player.level * 5
+        xp_ratio = player.xp / xp_needed
 
-    #Dibuja los orbes
-    for orb in orbs:
-        orb.draw(screen, camera_offset)
+        pygame.draw.rect(
+            screen,
+            (40, 40, 40),
+            (20, 60, bar_width, 20)
+        )
 
-    #Dibujar enemigos
-    for enemy in enemies:
-        enemy.draw(screen, camera_offset)
+        pygame.draw.rect(
+            screen,
+            (50, 150, 255),
+            (20, 60, bar_width * xp_ratio, 20)
+        )
 
-    #Dibujar proyectiles
-    for projectile in projectiles:
-        projectile.draw(screen, camera_offset)
+        #Nivel
+        level_text = font.render(
+            f"Level {player.level}",
+            True,
+            (255, 255, 255)
+        )
 
-    #Dibujar gemas de experiencia
-    for gem in xp_gems:
-        gem.draw(screen, camera_offset)
+        screen.blit(level_text, (20, 90))
 
-    #Dibuja items de orbe
-    for item in orb_items:
-        item.draw(screen, camera_offset)
+        #Dibuja el tiempo de la partida
+        time_text = font.render(
+            f"Time: {int(game_time)}s",
+            True,
+            (255, 255, 255)
+        )
 
-    #Barra de vida
-    bar_width = 250
-    bar_height = 25
-
-    health_ratio = player.health / player.max_health
-
-    pygame.draw.rect(
-        screen,
-        (100, 0, 0),
-        (20, 20, bar_width, bar_height)
-    )
-
-    #Vida actual
-    pygame.draw.rect(
-        screen,
-        (255, 0, 0),
-        (20, 20, bar_width * health_ratio, bar_height)
-    )
-
-    #Barra de XP
-    xp_needed = player.level * 5
-    xp_ratio = player.xp / xp_needed
-
-    pygame.draw.rect(
-        screen,
-        (40, 40, 40),
-        (20, 60, bar_width, 20)
-    )
-
-    pygame.draw.rect(
-        screen,
-        (50, 150, 255),
-        (20, 60, bar_width * xp_ratio, 20)
-    )
-
-    #Nivel
-    level_text = font.render(
-        f"Level {player.level}",
-        True,
-        (255, 255, 255)
-    )
-
-    screen.blit(level_text, (20, 90))
-
-    #Dibuja el tiempo de la partida
-    time_text = font.render(
-        f"Time: {int(game_time)}s",
-        True,
-        (255, 255, 255)
-    )
-
-    screen.blit(time_text, (20, 130))
+        screen.blit(time_text, (20, 130))
 
     #Dibuja el menu de level up
     if level_up_menu:
@@ -450,6 +511,77 @@ while running:
         screen.blit(option_1, (400, 320))
         screen.blit(option_2, (400, 370))
         screen.blit(option_3, (400, 420))
+
+    #Menu principal
+    if game_state == "menu":
+        title = font.render("UOH SURVIVORS", True, (255, 255, 0))
+
+        title_rect = title.get_rect(center=(WIDTH // 2, 180))
+
+        screen.blit(title, title_rect)
+
+        play_button = draw_button("Jugar",WIDTH // 2 - 150,320,300,60)
+
+        quit_button = draw_button("Salir",WIDTH // 2 - 150,440,300,60)
+
+        if pygame.mouse.get_pressed()[0]:
+
+            if play_button.collidepoint(pygame.mouse.get_pos()):
+                reset_game()
+                game_state = "playing"
+
+            elif quit_button.collidepoint(pygame.mouse.get_pos()):
+                running = False
+
+    #Pantalla de pausa
+    if game_state == "paused":
+        pause_text = font.render("PAUSA", True, (255, 255, 0))
+
+        pause_rect = pause_text.get_rect(center=(WIDTH // 2, 180))
+
+        screen.blit(pause_text, pause_rect)
+
+        continue_button = draw_button("Continuar",WIDTH // 2 - 150,260,300,60)
+
+        menu_button = draw_button("Menu Principal",WIDTH // 2 - 150,360,300,60)
+
+        quit_button = draw_button("Salir",WIDTH // 2 - 150,460,300,60)
+
+        if pygame.mouse.get_pressed()[0]:
+            if continue_button.collidepoint(pygame.mouse.get_pos()):
+                game_state = "playing"
+
+            elif menu_button.collidepoint(pygame.mouse.get_pos()):
+                game_state = "menu"
+
+            elif quit_button.collidepoint(pygame.mouse.get_pos()):
+                running = False
+
+    #Pantalla Gameover
+    if game_state == "game_over":
+        over_text = font.render("GAME OVER", True, (255, 0, 0))
+
+        over_rect = over_text.get_rect(center=(WIDTH // 2, 180))
+
+        screen.blit(over_text, over_rect)
+
+        retry_button = draw_button("Reintentar",WIDTH // 2 - 150,260,300,60)
+
+        menu_button = draw_button("Menu Principal",WIDTH // 2 - 150,360,300,60)
+
+        quit_button = draw_button("Salir",WIDTH // 2 - 150,460,300,60)
+
+        if pygame.mouse.get_pressed()[0]:
+
+            if retry_button.collidepoint(pygame.mouse.get_pos()):
+                reset_game()
+                game_state = "playing"
+
+            elif menu_button.collidepoint(pygame.mouse.get_pos()):
+                game_state = "menu"
+
+            elif quit_button.collidepoint(pygame.mouse.get_pos()):
+                running = False
 
     # Actualizar pantalla
     pygame.display.flip()
