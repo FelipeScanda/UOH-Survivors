@@ -33,8 +33,11 @@ GRID_SIZE = 64
 #Fuente del texto
 font = pygame.font.SysFont(None, 36)
 
+#Skin
+selected_skin = 1
+
 # Crear jugador
-player = Player(WIDTH // 2, HEIGHT // 2)
+player = Player(WIDTH // 2, HEIGHT // 2, selected_skin)
 
 #Crear enemigos
 enemies = []
@@ -134,8 +137,9 @@ def reset_game():
     global game_time
     global enemy_spawn_timer
     global level_up_menu
+    global selected_skin
 
-    player = Player(WIDTH // 2, HEIGHT // 2)
+    player = Player(WIDTH // 2, HEIGHT // 2, selected_skin)
 
     enemies = []
     projectiles = []
