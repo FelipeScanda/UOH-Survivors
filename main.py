@@ -445,50 +445,26 @@ while running:
 
         health_ratio = player.health / player.max_health
 
-        pygame.draw.rect(
-            screen,
-            (100, 0, 0),
-            (20, 20, bar_width, bar_height)
-        )
+        pygame.draw.rect(screen, (100, 0, 0), (20, 20, bar_width, bar_height))
 
         #Vida actual
-        pygame.draw.rect(
-            screen,
-            (255, 0, 0),
-            (20, 20, bar_width * health_ratio, bar_height)
-        )
+        pygame.draw.rect(screen, (200, 40, 40), (20, 20, bar_width * health_ratio, bar_height))
 
         #Barra de XP
         xp_needed = player.level * 5
         xp_ratio = player.xp / xp_needed
 
-        pygame.draw.rect(
-            screen,
-            (40, 40, 40),
-            (20, 60, bar_width, 20)
-        )
+        pygame.draw.rect(screen, (40, 40, 40), (20, 60, bar_width, 20))
 
-        pygame.draw.rect(
-            screen,
-            (50, 150, 255),
-            (20, 60, bar_width * xp_ratio, 20)
-        )
+        pygame.draw.rect(screen, (50, 150, 255), (20, 60, bar_width * xp_ratio, 20))
 
         #Nivel
-        level_text = font.render(
-            f"Level {player.level}",
-            True,
-            (255, 255, 255)
-        )
+        level_text = font.render(f"Level {player.level}", True, (255, 255, 255))
 
         screen.blit(level_text, (20, 90))
 
         #Dibuja el tiempo de la partida
-        time_text = font.render(
-            f"Time: {int(game_time)}s",
-            True,
-            (255, 255, 255)
-        )
+        time_text = font.render(f"Time: {int(game_time)}s", True, (255, 255, 255))
 
         screen.blit(time_text, (20, 130))
 
