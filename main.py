@@ -33,6 +33,13 @@ GRID_SIZE = 64
 #Fuente del texto
 font = pygame.font.SysFont(None, 36)
 
+#Previsualizar skins
+menu_skin_1 = pygame.image.load("assets/player/Barranquin1.png").convert_alpha()
+menu_skin_2 = pygame.image.load("assets/player/Barranquin2.png").convert_alpha()
+
+menu_skin_1 = pygame.transform.scale(menu_skin_1,(120, 120))
+menu_skin_2 = pygame.transform.scale(menu_skin_2,(120, 120))
+
 #Skin
 selected_skin = 1
 
@@ -524,9 +531,23 @@ while running:
 
         screen.blit(title, title_rect)
 
-        play_button = draw_button("Jugar",WIDTH // 2 - 150,320,300,60)
+        #Preview de skin
+        if selected_skin == 1:
+            current_preview = menu_skin_1
 
-        quit_button = draw_button("Salir",WIDTH // 2 - 150,440,300,60)
+        else:
+            current_preview = menu_skin_2
+
+        preview_rect = current_preview.get_rect(center=(WIDTH // 2, 300))
+
+        screen.blit(current_preview, preview_rect)
+
+        play_button = draw_button("Jugar",WIDTH // 2 - 150,420,300,60)
+
+        skin_1_button = draw_button("Skin 1", WIDTH // 2 - 320, 640, 140, 50)
+        skin_2_button = draw_button("Skin 2", WIDTH // 2 + 180, 640, 140, 50)
+
+        quit_button = draw_button("Salir",WIDTH // 2 - 150,520,300,60)
 
         if pygame.mouse.get_pressed()[0]:
 
@@ -536,6 +557,12 @@ while running:
 
             elif quit_button.collidepoint(pygame.mouse.get_pos()):
                 running = False
+
+            elif skin_1_button.collidepoint(pygame.mouse.get_pos()):
+                selected_skin = 1
+
+            elif skin_2_button.collidepoint(pygame.mouse.get_pos()):
+                selected_skin = 2
 
     #Pantalla de pausa
     if game_state == "paused":
