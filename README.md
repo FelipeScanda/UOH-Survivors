@@ -27,6 +27,18 @@ Finalmente, para instalar la libreria necesaria, se utiliza:
 
 Con esto, se tendrá el entorno listo para jugar y desarrollar el juego
 
+### Ejecución del juego y cómo jugar
+
+Para abrir el juego, se debe ejecutar el archivo main.py, de la siguiente manera:
+
+- python main.py
+
+Esto abrirá la ventana del juego, iniciando en el menú principal. Los controles básicos del juego son:
+
+- WASD para mover al personaje
+- 123 para seleccionar la mejora del personaje al subir de nivel
+- Esc para abrir el menú de pausa
+
 ### Estado del juego
 
 El juego UOH Survivors es totalmente jugable, sin embagro, aun queda mucho desarrollo por delante, y muchas implementaciones que hacer para mejorar la jugabilidad y el diseño gráfico del juego.
