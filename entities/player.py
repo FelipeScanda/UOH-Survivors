@@ -5,7 +5,7 @@ from settings import *
 
 class Player:
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, skin=1):
 
         # Tamaño del jugador
         self.width = 40
@@ -39,6 +39,14 @@ class Player:
         self.health = self.max_health
 
         self.invulnerability_timer = 0
+
+        #Skin
+
+        if skin == 1:
+            self.sprite = pygame.image.load("assets/player/Barranquin1.png").convert_alpha()
+
+        else:
+            self.sprite = pygame.image.load("assets/player/Barranquin2.png").convert_alpha()
 
     def handle_movement(self, dt):
 
@@ -119,7 +127,7 @@ class Player:
             self.height
         )
 
-        pygame.draw.rect(screen, self.color, screen_rect)
+        screen.blit(self.sprite, (screen_rect.x, screen_rect.y))
     
     def gain_xp(self, amount):
 
