@@ -48,6 +48,9 @@ class Player:
         else:
             self.sprite = pygame.image.load("assets/player/Barranquin2.png").convert_alpha()
 
+        #Escala la skin
+        self.sprite = pygame.transform.scale(self.sprite,(64, 64))
+
     def handle_movement(self, dt):
 
         # Obtener teclas presionadas
@@ -127,7 +130,11 @@ class Player:
             self.height
         )
 
-        screen.blit(self.sprite, (screen_rect.x, screen_rect.y))
+        #Centrar sprite
+        sprite_rect = self.sprite.get_rect(center=screen_rect.center) 
+
+        #Dibujar sprite
+        screen.blit(self.sprite, sprite_rect)
     
     def gain_xp(self, amount):
 
