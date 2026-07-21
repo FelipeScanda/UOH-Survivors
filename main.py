@@ -9,84 +9,72 @@ from entities.enemy import Enemy
 from entities.projectile import Projectile
 from entities.xp_gem import XPGem
 from entities.orbiting_orb import OrbitingOrb
+from entities.ram_boomerang import RAMBoomerang
 
 from items.orb_item import OrbItem
 
-# Inicializa todos los módulos de pygame
 pygame.init()
 
-# Crear ventana
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-# Título de la ventana
 pygame.display.set_caption(TITLE)
 
-# Controlador de FPS
 clock = pygame.time.Clock()
 
-#Camara
 camera_offset = pygame.Vector2()
 
-#Tamaño de la grid (para dibujar el mapa)
 GRID_SIZE = 64
 
-#Fuente del texto
 font = pygame.font.SysFont(None, 36)
 
-#Previsualizar skins
 menu_skin_1 = pygame.image.load("assets/player/Barranquin1.png").convert_alpha()
 menu_skin_2 = pygame.image.load("assets/player/Barranquin2.png").convert_alpha()
 
 menu_skin_1 = pygame.transform.scale(menu_skin_1,(120, 120))
 menu_skin_2 = pygame.transform.scale(menu_skin_2,(120, 120))
 
-#Skin
 selected_skin = 1
 
-# Crear jugador
 player = Player(WIDTH // 2, HEIGHT // 2, selected_skin)
 
-#Crear enemigos
 enemies = []
 
-#Porpiedades de spawneo de enemigos
 enemy_spawn_timer = 0
 enemy_spawn_cooldown = 2
 
-#Contador de tiempo de la partida
 game_time = 0
 
-#Crear proyectiles
 projectiles = []
 
-#Crear gemas de experiencia
 xp_gems = []
 
-#Crear orbes e items de orbes
 orbs = []
 orb_items = []
 
-#Funcion para spawnear enemigos
+ram_boomerangs = []
+ram_boomerang_level = 0
+ram_boomerang_timer = 0
+ram_boomerang_cooldown = 4
+
 def spawn_enemy():
     side = random.randint(0, 3)
 
-    if side == 0:  # arriba
+    if side == 0:
         x = random.randint(0, WIDTH)
         y = -50
 
-    elif side == 1:  # abajo
+    elif side == 1:
         x = random.randint(0, WIDTH)
         y = HEIGHT + 50
 
-    elif side == 2:  # izquierda
+    elif side == 2:
         x = -50
         y = random.randint(0, HEIGHT)
 
-    else:  # derecha
+    else:
         x = WIDTH + 50
         y = random.randint(0, HEIGHT)
 
-    #Probabilidad de spawn de enemigos
     enemy_type = random.choices(
         ["normal", "fast", "tank"],
         weights=[70, 20, 10]
@@ -94,13 +82,11 @@ def spawn_enemy():
 
     enemy = Enemy(x, y, enemy_type)
 
-    #Aumentar las estadisticas de los enemigos con el tiempo
     enemy.health += int(game_time // 20)
     enemy.speed += game_time * 0.5
 
     enemies.append(enemy)
 
-#Funcion para redistribuir orbes
 def redistribute_orbs():
     if len(orbs) == 0:
         return
@@ -110,7 +96,6 @@ def redistribute_orbs():
     for index, orb in enumerate(orbs):
         orb.set_angle(index * angle_step)
 
-#Botones reutilizables
 def draw_button(text, x, y, width, height):
     mouse_pos = pygame.mouse.get_pos()
     button_rect = pygame.Rect(x, y, width, height)
@@ -132,7 +117,6 @@ def draw_button(text, x, y, width, height):
     screen.blit(label, label_rect)
     return button_rect
 
-#Funcion para restart
 def reset_game():
 
     global player
@@ -145,6 +129,9 @@ def reset_game():
     global enemy_spawn_timer
     global level_up_menu
     global selected_skin
+    global ram_boomerangs
+    global ram_boomerang_level
+    global ram_boomerang_timer
 
     player = Player(WIDTH // 2, HEIGHT // 2, selected_skin)
 
@@ -153,19 +140,19 @@ def reset_game():
     xp_gems = []
     orb_items = []
     orbs = []
+    ram_boomerangs = []
+    ram_boomerang_level = 0
+    ram_boomerang_timer = 0
 
     game_time = 0
     enemy_spawn_timer = 0
 
     level_up_menu = False
 
-# Variable principal del game loop
 running = True
 
-#Variable del estado del juego (se parte en el menu principal)
 game_state = "menu"
 
-#Estado de level up
 level_up_menu = False
 
 upgrade_options = [
@@ -174,18 +161,13 @@ upgrade_options = [
     "Move Speed"
 ]
 
-# GAME LOOP
 while running:
-    # Delta time
     dt = clock.tick(FPS) / 1000
 
-    # EVENTOS
     for event in pygame.event.get():
-        # Detectar cierre de ventana
         if event.type == pygame.QUIT:
             running = False
 
-        #Boton de pausa
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
 
@@ -195,7 +177,6 @@ while running:
                 elif game_state == "paused":
                     game_state = "playing"
 
-        #Seleccion de mejoras del menu de level up
         if level_up_menu and event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1:
                 player.damage += 1
@@ -209,41 +190,30 @@ while running:
                 player.speed += 50
                 level_up_menu = False
 
-    # UPDATE
     if game_state == "playing" and not level_up_menu:
-        #Actualiza jugador
         player.handle_movement(dt)
 
-        #Actualiza camara
         camera_offset.x = player.position.x - WIDTH // 2
         camera_offset.y = player.position.y - HEIGHT // 2
 
-        #Actualiza orbes
         for orb in orbs:
             orb.update(dt)
 
-        #Actualiza tiempo de juego
         game_time += dt
 
-        #Actualiza timer de invulnerabilidad
         if player.invulnerability_timer > 0:
             player.invulnerability_timer -= dt
 
-        #Actualiza temporizador de disparo
         player.shoot_timer -= dt
 
-        #Actualiza temporizador de spawn de enemigos
         enemy_spawn_timer += dt
 
-        #Cooldown de spawneo de enemigos
         current_spawn_cooldown = max(0.3, enemy_spawn_cooldown - (game_time * 0.02))
 
-        #Spawn automatico de enemigos
         if enemy_spawn_timer >= current_spawn_cooldown:
             spawn_enemy()
             enemy_spawn_timer = 0
 
-        #Disparo automático
         if player.shoot_timer <= 0:
             direction = player.shoot(enemies)
 
@@ -257,16 +227,32 @@ while running:
                 projectiles.append(projectile)
                 player.shoot_timer = player.shoot_cooldown
 
-        #Actualiza enemigos
+        if ram_boomerang_level > 0:
+            ram_boomerang_timer -= dt
+
+            if ram_boomerang_timer <= 0:
+                direction = player.shoot(enemies)
+
+                if direction:
+                    boomerang = RAMBoomerang(
+                        player.rect.centerx,
+                        player.rect.centery,
+                        direction
+                    )
+                    boomerang.damage = 3 + ram_boomerang_level
+                    ram_boomerangs.append(boomerang)
+                    ram_boomerang_timer = ram_boomerang_cooldown
+
+        for boomerang in ram_boomerangs:
+            boomerang.update(dt, player)
+
         for enemy in enemies:
             enemy.update(player, dt)
 
-        #Detecta colisiones de enemigos con el jugador
         for enemy in enemies:
             if enemy.rect.colliderect(player.rect):
                 player.take_damage(10)
 
-        #Detecta colision de orbes con los enemigos
         for orb in orbs:
             orb_rect = pygame.Rect(
                 orb.position.x - orb.radius,
@@ -278,7 +264,6 @@ while running:
             for enemy in enemies[:]:
 
                 if orb_rect.colliderect(enemy.rect):
-                    #Detecta el cooldown de daño del enemigo, si no tiene cooldown, le hace daño y setea el nuevo cooldown
                     if enemy.damage_cooldown <= 0:
                         died = enemy.take_damage(orb.damage)
                         enemy.damage_cooldown = 0.5
@@ -292,7 +277,6 @@ while running:
 
                             xp_gems.append(xp_gem)
 
-                            #Posibilidad de dropear un item de orbe
                             if random.random() < 0.1:
                                 orb_item = OrbItem(
                                     enemy.rect.centerx,
@@ -303,7 +287,6 @@ while running:
 
                             enemies.remove(enemy)
 
-        #Actualiza proyectiles
         for projectile in projectiles:
             projectile.update(dt)
 
@@ -319,18 +302,15 @@ while running:
                 if projectile_rect.colliderect(enemy.rect):
                     died = enemy.take_damage(player.damage)
 
-                    # Eliminar proyectil
                     if projectile in projectiles:
                         projectiles.remove(projectile)
 
-                    # Si enemigo murió
                     if died:
                         xp_gem = XPGem(
                             enemy.rect.centerx,
                             enemy.rect.centery
                         )
 
-                        #Distintas recompensas segun el tipo de enemigo
                         if enemy.enemy_type == "fast":
                             xp_gem.value = 2
 
@@ -339,7 +319,6 @@ while running:
 
                         xp_gems.append(xp_gem)
 
-                        #Posibilidad de dropear un item de orbe
                         if random.random() < 0.1:
                             orb_item = OrbItem(
                                 enemy.rect.centerx,
@@ -352,12 +331,41 @@ while running:
 
                     break
 
+        for boomerang in ram_boomerangs:
+            hit_list = (
+                boomerang.hit_enemies_outgoing
+                if boomerang.state == "outgoing"
+                else boomerang.hit_enemies_returning
+            )
+
+            for enemy in enemies[:]:
+                if boomerang.get_rect().colliderect(enemy.rect) and enemy not in hit_list:
+                    hit_list.append(enemy)
+                    died = enemy.take_damage(boomerang.damage)
+
+                    if died:
+                        xp_gem = XPGem(enemy.rect.centerx, enemy.rect.centery)
+
+                        if enemy.enemy_type == "fast":
+                            xp_gem.value = 2
+                        elif enemy.enemy_type == "tank":
+                            xp_gem.value = 5
+
+                        xp_gems.append(xp_gem)
+
+                        if random.random() < 0.1:
+                            orb_item = OrbItem(enemy.rect.centerx, enemy.rect.centery)
+                            orb_items.append(orb_item)
+
+                        enemies.remove(enemy)
+
+        ram_boomerangs = [b for b in ram_boomerangs if not b.finished]
+
         player_center = pygame.Vector2(
             player.rect.centerx,
             player.rect.centery
         )
 
-        #Recolecta gemas de xp
         for gem in xp_gems[:]:
             distance = player_center.distance_to(gem.position)
 
@@ -369,36 +377,28 @@ while running:
 
                 xp_gems.remove(gem)
 
-        #Recolecta items de orbe
         for item in orb_items[:]:
             distance = player_center.distance_to(item.position)
 
             if distance < 30:
-                #Agregar nuevo orbe
                 new_orb = OrbitingOrb(player)
                 orbs.append(new_orb)
 
-                #Redistribuir los orbes
                 redistribute_orbs()
 
                 orb_items.remove(item)
 
-        #Detecta si la vida del jugador llegó a 0
         if player.health <= 0:
             game_state = "game_over"
 
-    # DRAW
     screen.fill(BACKGROUND_COLOR)
 
     if game_state in ["playing", "paused", "game_over"]:
-        #Grid infinita
         grid_color = (40, 40, 40)
 
-        # Offset visual de la cámara
         offset_x = int(camera_offset.x % GRID_SIZE)
         offset_y = int(camera_offset.y % GRID_SIZE)
 
-        # Líneas verticales
         for x in range(-GRID_SIZE, WIDTH + GRID_SIZE, GRID_SIZE):
             pygame.draw.line(
                 screen,
@@ -407,7 +407,6 @@ while running:
                 (x - offset_x, HEIGHT)
             )
 
-        # Líneas horizontales
         for y in range(-GRID_SIZE, HEIGHT + GRID_SIZE, GRID_SIZE):
             pygame.draw.line(
                 screen,
@@ -416,30 +415,26 @@ while running:
                 (WIDTH, y - offset_y)
             )
 
-        #Dibujar al jugador
         player.draw(screen, camera_offset)
 
-        #Dibuja los orbes
         for orb in orbs:
             orb.draw(screen, camera_offset)
 
-        #Dibujar enemigos
         for enemy in enemies:
             enemy.draw(screen, camera_offset)
 
-        #Dibujar proyectiles
         for projectile in projectiles:
             projectile.draw(screen, camera_offset)
 
-        #Dibujar gemas de experiencia
+        for boomerang in ram_boomerangs:
+            boomerang.draw(screen, camera_offset)
+
         for gem in xp_gems:
             gem.draw(screen, camera_offset)
 
-        #Dibuja items de orbe
         for item in orb_items:
             item.draw(screen, camera_offset)
 
-        #Barra de vida
         bar_width = 250
         bar_height = 25
 
@@ -447,10 +442,8 @@ while running:
 
         pygame.draw.rect(screen, (100, 0, 0), (30, 20, bar_width, bar_height))
 
-        #Vida actual
         pygame.draw.rect(screen, (255, 0, 0), (30, 20, bar_width * health_ratio, bar_height))
 
-        #Barra de XP
         xp_needed = player.level * 5
         xp_ratio = player.xp / xp_needed
 
@@ -458,21 +451,20 @@ while running:
 
         pygame.draw.rect(screen, (50, 150, 255), (30, 60, bar_width * xp_ratio, 20))
 
-        #Nivel
         level_text = font.render(f"Level {player.level}", True, (255, 255, 255))
 
         screen.blit(level_text, (30, 90))
 
-        #Dibuja el tiempo de la partida
         time_text = font.render(f"Time: {int(game_time)}s", True, (255, 255, 255))
 
         screen.blit(time_text, (30, 130))
 
-        #Dibuja cantidad de orbes
         orb_text = font.render(f"Orbes: {len(orbs)}", True, (255, 255, 255))
         screen.blit(orb_text, (30, 170))
 
-    #Dibuja el menu de level up
+        ram_text = font.render(f"RAM Boomerang Lv: {ram_boomerang_level}", True, (255, 255, 255))
+        screen.blit(ram_text, (30, 210))
+
     if level_up_menu:
         menu_text = font.render(
             "LEVEL UP! Escoge una mejora:",
@@ -503,7 +495,6 @@ while running:
         screen.blit(option_2, (400, 370))
         screen.blit(option_3, (400, 420))
 
-    #Menu principal
     if game_state == "menu":
         title = font.render("UOH SURVIVORS", True, (255, 255, 0))
 
@@ -511,7 +502,6 @@ while running:
 
         screen.blit(title, title_rect)
 
-        #Preview de skin
         if selected_skin == 1:
             current_preview = menu_skin_1
 
@@ -544,7 +534,6 @@ while running:
             elif skin_2_button.collidepoint(pygame.mouse.get_pos()):
                 selected_skin = 2
 
-    #Pantalla de pausa
     if game_state == "paused":
         pause_text = font.render("PAUSA", True, (255, 255, 0))
 
@@ -568,7 +557,6 @@ while running:
             elif quit_button.collidepoint(pygame.mouse.get_pos()):
                 running = False
 
-    #Pantalla Gameover
     if game_state == "game_over":
         over_text = font.render("GAME OVER", True, (255, 0, 0))
 
@@ -594,9 +582,7 @@ while running:
             elif quit_button.collidepoint(pygame.mouse.get_pos()):
                 running = False
 
-    # Actualizar pantalla
     pygame.display.flip()
 
-# Cierre limpio
 pygame.quit()
 sys.exit()
