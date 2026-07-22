@@ -10,6 +10,7 @@ from entities.projectile import Projectile
 from entities.xp_gem import XPGem
 from entities.orbiting_orb import OrbitingOrb
 from entities.ram_boomerang import RAMBoomerang
+from entities.segfault_event import SegFaultEvent
 
 from items.orb_item import OrbItem
 
@@ -55,6 +56,9 @@ ram_boomerangs = []
 ram_boomerang_level = 0
 ram_boomerang_timer = 0
 ram_boomerang_cooldown = 4
+
+ram_evolved = False
+segfault_event = None
 
 def spawn_enemy():
     side = random.randint(0, 3)
@@ -132,6 +136,8 @@ def reset_game():
     global ram_boomerangs
     global ram_boomerang_level
     global ram_boomerang_timer
+    global ram_evolved
+    global segfault_event
 
     player = Player(WIDTH // 2, HEIGHT // 2, selected_skin)
 
@@ -143,6 +149,8 @@ def reset_game():
     ram_boomerangs = []
     ram_boomerang_level = 0
     ram_boomerang_timer = 0
+    ram_evolved = False
+    segfault_event = None
 
     game_time = 0
     enemy_spawn_timer = 0
@@ -194,6 +202,10 @@ while running:
             elif event.key == pygame.K_4:
                 ram_boomerang_level += 1
                 level_up_menu = False
+
+                if ram_boomerang_level >= 3 and not ram_evolved:
+                    ram_evolved = True
+                    segfault_event = SegFaultEvent()
 
     if game_state == "playing" and not level_up_menu:
         player.handle_movement(dt)
@@ -366,6 +378,24 @@ while running:
 
         ram_boomerangs = [b for b in ram_boomerangs if not b.finished]
 
+        if ram_evolved and segfault_event:
+            trigger_crash = segfault_event.update(dt)
+
+            if trigger_crash:
+                for enemy in enemies[:]:
+                    died = enemy.take_damage(9999)
+
+                    if died:
+                        xp_gem = XPGem(enemy.rect.centerx, enemy.rect.centery)
+
+                        if enemy.enemy_type == "fast":
+                            xp_gem.value = 2
+                        elif enemy.enemy_type == "tank":
+                            xp_gem.value = 5
+
+                        xp_gems.append(xp_gem)
+                        enemies.remove(enemy)
+
         player_center = pygame.Vector2(
             player.rect.centerx,
             player.rect.centery
@@ -469,6 +499,9 @@ while running:
 
         ram_text = font.render(f"RAM Boomerang Lv: {ram_boomerang_level}", True, (255, 255, 255))
         screen.blit(ram_text, (30, 210))
+
+        if ram_evolved and segfault_event:
+            segfault_event.draw(screen, WIDTH, HEIGHT, font)
 
     if level_up_menu:
         menu_text = font.render(
