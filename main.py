@@ -158,7 +158,8 @@ level_up_menu = False
 upgrade_options = [
     "Damage",
     "Attack Speed",
-    "Move Speed"
+    "Move Speed",
+    "RAM Boomerang"
 ]
 
 while running:
@@ -188,6 +189,10 @@ while running:
 
             elif event.key == pygame.K_3:
                 player.speed += 50
+                level_up_menu = False
+
+            elif event.key == pygame.K_4:
+                ram_boomerang_level += 1
                 level_up_menu = False
 
     if game_state == "playing" and not level_up_menu:
@@ -490,10 +495,17 @@ while running:
             (255, 255, 255)
         )
 
+        option_4 = font.render(
+            "4 - RAM Boomerang",
+            True,
+            (255, 255, 255)
+        )
+
         screen.blit(menu_text, (400, 250))
         screen.blit(option_1, (400, 320))
         screen.blit(option_2, (400, 370))
         screen.blit(option_3, (400, 420))
+        screen.blit(option_4, (400, 470))
 
     if game_state == "menu":
         title = font.render("UOH SURVIVORS", True, (255, 255, 0))
