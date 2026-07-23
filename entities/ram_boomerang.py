@@ -9,7 +9,10 @@ class RAMBoomerang:
         self.position = pygame.Vector2(x, y)
         self.origin = pygame.Vector2(x, y)
 
-        self.direction = direction
+        if direction.length() > 0:
+            self.direction = direction.normalize()
+        else:
+            self.direction = pygame.Vector2(1, 0)
 
         self.speed = 350
         self.max_distance = 220
@@ -51,13 +54,8 @@ class RAMBoomerang:
 
         self.rotation += self.rotation_speed * dt
 
-    def get_rect(self):
-        return pygame.Rect(
-            self.position.x - self.width / 2,
-            self.position.y - self.height / 2,
-            self.width,
-            self.height
-        )
+    def get_collision_radius(self):
+        return max(self.width, self.height) / 2
 
     def draw(self, screen, camera_offset):
         color = self.color_outgoing if self.state == "outgoing" else self.color_returning

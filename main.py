@@ -356,7 +356,11 @@ while running:
             )
 
             for enemy in enemies[:]:
-                if boomerang.get_rect().colliderect(enemy.rect) and enemy not in hit_list:
+                enemy_center = pygame.Vector2(enemy.rect.centerx, enemy.rect.centery)
+                distance = boomerang.position.distance_to(enemy_center)
+                collision_distance = boomerang.get_collision_radius() + (enemy.rect.width / 2)
+
+                if distance <= collision_distance and enemy not in hit_list:
                     hit_list.append(enemy)
                     died = enemy.take_damage(boomerang.damage)
 
@@ -382,7 +386,19 @@ while running:
             trigger_crash = segfault_event.update(dt)
 
             if trigger_crash:
+                screen_bounds = pygame.Rect(0, 0, WIDTH, HEIGHT)
+
                 for enemy in enemies[:]:
+                    enemy_screen_rect = pygame.Rect(
+                        enemy.rect.x - camera_offset.x,
+                        enemy.rect.y - camera_offset.y,
+                        enemy.rect.width,
+                        enemy.rect.height
+                    )
+
+                    if not screen_bounds.colliderect(enemy_screen_rect):
+                        continue
+
                     died = enemy.take_damage(9999)
 
                     if died:
