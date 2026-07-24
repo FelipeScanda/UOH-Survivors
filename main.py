@@ -13,6 +13,7 @@ from entities.ram_boomerang import RAMBoomerang
 from entities.segfault_event import SegFaultEvent
 
 from items.orb_item import OrbItem
+from items.ram_boomerang_item import RamBoomerangItem
 
 pygame.init()
 
@@ -51,6 +52,7 @@ xp_gems = []
 
 orbs = []
 orb_items = []
+ram_boomerang_items = []
 
 ram_boomerangs = []
 ram_boomerang_level = 0
@@ -129,6 +131,7 @@ def reset_game():
     global xp_gems
     global orb_items
     global orbs
+    global ram_boomerang_items
     global game_time
     global enemy_spawn_timer
     global level_up_menu
@@ -146,6 +149,7 @@ def reset_game():
     xp_gems = []
     orb_items = []
     orbs = []
+    ram_boomerang_items = []
     ram_boomerangs = []
     ram_boomerang_level = 0
     ram_boomerang_timer = 0
@@ -166,8 +170,7 @@ level_up_menu = False
 upgrade_options = [
     "Damage",
     "Attack Speed",
-    "Move Speed",
-    "RAM Boomerang"
+    "Move Speed"
 ]
 
 while running:
@@ -198,14 +201,6 @@ while running:
             elif event.key == pygame.K_3:
                 player.speed += 50
                 level_up_menu = False
-
-            elif event.key == pygame.K_4:
-                ram_boomerang_level += 1
-                level_up_menu = False
-
-                if ram_boomerang_level >= 3 and not ram_evolved:
-                    ram_evolved = True
-                    segfault_event = SegFaultEvent()
 
     if game_state == "playing" and not level_up_menu:
         player.handle_movement(dt)
@@ -302,6 +297,14 @@ while running:
 
                                 orb_items.append(orb_item)
 
+                            if random.random() < 0.1:
+                                ram_item = RamBoomerangItem(
+                                    enemy.rect.centerx,
+                                    enemy.rect.centery
+                                )
+
+                                ram_boomerang_items.append(ram_item)
+
                             enemies.remove(enemy)
 
         for projectile in projectiles:
@@ -344,6 +347,14 @@ while running:
 
                             orb_items.append(orb_item)
 
+                        if random.random() < 0.1:
+                            ram_item = RamBoomerangItem(
+                                enemy.rect.centerx,
+                                enemy.rect.centery
+                            )
+
+                            ram_boomerang_items.append(ram_item)
+
                         enemies.remove(enemy)
 
                     break
@@ -377,6 +388,10 @@ while running:
                         if random.random() < 0.1:
                             orb_item = OrbItem(enemy.rect.centerx, enemy.rect.centery)
                             orb_items.append(orb_item)
+
+                        if random.random() < 0.1:
+                            ram_item = RamBoomerangItem(enemy.rect.centerx, enemy.rect.centery)
+                            ram_boomerang_items.append(ram_item)
 
                         enemies.remove(enemy)
 
@@ -439,6 +454,18 @@ while running:
 
                 orb_items.remove(item)
 
+        for item in ram_boomerang_items[:]:
+            distance = player_center.distance_to(item.position)
+
+            if distance < 30:
+                ram_boomerang_level += 1
+
+                if ram_boomerang_level >= 3 and not ram_evolved:
+                    ram_evolved = True
+                    segfault_event = SegFaultEvent()
+
+                ram_boomerang_items.remove(item)
+
         if player.health <= 0:
             game_state = "game_over"
 
@@ -484,6 +511,9 @@ while running:
             gem.draw(screen, camera_offset)
 
         for item in orb_items:
+            item.draw(screen, camera_offset)
+
+        for item in ram_boomerang_items:
             item.draw(screen, camera_offset)
 
         bar_width = 250
@@ -544,17 +574,10 @@ while running:
             (255, 255, 255)
         )
 
-        option_4 = font.render(
-            "4 - RAM Boomerang",
-            True,
-            (255, 255, 255)
-        )
-
         screen.blit(menu_text, (400, 250))
         screen.blit(option_1, (400, 320))
         screen.blit(option_2, (400, 370))
         screen.blit(option_3, (400, 420))
-        screen.blit(option_4, (400, 470))
 
     if game_state == "menu":
         title = font.render("UOH SURVIVORS", True, (255, 255, 0))
